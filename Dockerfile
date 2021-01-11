@@ -1,19 +1,21 @@
-# pull official base image
-FROM node:13.12.0-alpine
+# build environment
+FROM node:13.12.0-alpine as builder
 
-# set working directory
 WORKDIR /app
-
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
-
-# install app dependencies
-COPY package.json ./
+COPY . .
 RUN npm install
+RUN npm run build
 
-# add app
-COPY . ./
+# production environment
+# nginx state for serving content
+FROM nginx:alpine
+# Set working directory to nginx asset directory
+WORKDIR /usr/share/nginx/html
+# Remove default nginx static assets
+RUN rm -rf ./*
+# Copy static assets from builder stage
+COPY --from=builder /app/build .
 
-EXPOSE 3001
-# start app
-CMD ["npm", "start"]
+EXPOSE 80
+# Containers run nginx with global directives and daemon off
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

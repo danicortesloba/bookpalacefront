@@ -6,11 +6,7 @@ const HelloWorld = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await axios.get("http://localhost:8000/", {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
-      });
+      const result = await axios.get("http://localhost:8000/", {});
       updateGreeting(result.data);
     };
     fetchData();
